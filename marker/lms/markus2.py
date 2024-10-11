@@ -199,25 +199,26 @@ class Markus2(LMS):
         if self.cfg["allow_late"]:
             collected = False
 
+        os.makedirs(student, exist_ok=True)
         if 'file_names' in self.cfg:
             for fname in self.cfg['file_names']:
-                data = { 'filename': fname, 'collected': collected}
-                async with session.get(url, data=data, headers=self.header) as resp:
+                data = { 'filename': fname, 'collected': collected }
+                async with session.get(url, json=data, headers=self.header) as resp:
+                    if resp.status == 200:
+                        content = await resp.content.read()
+                        file_path = os.path.join(student, fname)
+                        f = await aiofiles.open(file_path, mode='wb')
+                        await f.write(content)
+                        await f.close()
+        else:
+            data = { 'collected': collected }
+            async with session.get(url, json=data, headers=self.header) as resp:
+                if resp.status == 200:
                     content = await resp.content.read()
-                    file_path = os.path.join(student, fname)
-                    os.makedirs(student, exist_ok=True)
+                    file_path = os.path.join(student, student + ".zip")
                     f = await aiofiles.open(file_path, mode='wb')
                     await f.write(content)
                     await f.close()
-        else:
-            data = {'collected': collected}
-            async with session.get(url, data=data, headers=self.header) as resp:
-                content = await resp.content.read()
-                file_path = os.path.join(student, student + ".zip")
-                os.makedirs(student, exist_ok=True)
-                f = await aiofiles.open(file_path, mode='wb')
-                await f.write(content)
-                await f.close()
 
     # -------------------------------------------------------------------------
     
