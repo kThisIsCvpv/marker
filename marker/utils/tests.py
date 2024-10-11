@@ -5,8 +5,8 @@ import time
 
 def run_test(test):
     '''
-    Given the test object from the configuration file, run the test case. The 
-    current working directory must be the testing directory of the student 
+    Given the test object from the configuration file, run the test case. The
+    current working directory must be the testing directory of the student
     being marked.
 
     Return: The mark to be assigned for the test case
@@ -17,7 +17,7 @@ def run_test(test):
     # Run the setup, main, and cleaup commands for the test case if needed
     if test['before'] is not None:
         run_command(test['before'], timeout, output=False)
-    
+
     start_time = time.time()
     exit_code, output = run_command(test['command'], timeout=timeout)
     end_time = time.time()
@@ -25,17 +25,27 @@ def run_test(test):
     if test['after'] is not None:
         run_command(test['after'], timeout, output=False)
 
-    result = {} 
+    result = {}
     result["description"] = test['description']
     result["output"] = output
     result["exit_code"] = exit_code
     result["time"] = end_time - start_time
     result["passed"] = (exit_code == test['exit_code'])
     result["timed_out"] = (exit_code is None)
-    result["mark"] = test["mark"] if result["passed"] else 0
+    result["mark"] = compute_mark(result["passed"], test["part_marks_file"], test["mark"])
     result["out_of"] = test["mark"]
 
     return result
+
+def compute_mark(passed, part_marks_file, total_mark):
+    if not passed:
+        return 0
+
+    if part_marks_file is not None:
+        with open(part_marks_file, 'r') as part_marks:
+            return int(part_marks.read().strip())
+
+    return total_mark
 
 def run_command(cmd, timeout=None, output=True, limit=1000):
     '''
@@ -54,7 +64,7 @@ def run_command(cmd, timeout=None, output=True, limit=1000):
         limit = -1
 
     try:
-        proc = subproc.Popen(cmd, 
+        proc = subproc.Popen(cmd,
                              shell=True,
                              preexec_fn=os.setsid,
                              stdout=stdout_fd,
@@ -62,7 +72,7 @@ def run_command(cmd, timeout=None, output=True, limit=1000):
                              executable="/bin/bash"
                              )
     except Exception as e:
-        # We have an unknown error here, possibly that the executable 
+        # We have an unknown error here, possibly that the executable
         # file does not exist. Return -1 with the error message in stderr
         return (-1, str(e))
 
