@@ -19,7 +19,7 @@ def run_test(test):
         run_command(test['before'], timeout, output=False)
 
     start_time = time.time()
-    exit_code, output = run_command(test['command'], timeout=timeout)
+    exit_code, output = run_command(test['command'], timeout=timeout, limit=test['limit'])
     end_time = time.time()
 
     if test['after'] is not None:

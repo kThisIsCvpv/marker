@@ -64,4 +64,5 @@ base_test_config = {
     "timeout": 1,
     "exit_code": 0,
     "part_marks_file": None,
+    "limit": 1000,
 }
