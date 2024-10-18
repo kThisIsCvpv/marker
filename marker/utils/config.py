@@ -63,6 +63,6 @@ base_test_config = {
     "after": None,
     "timeout": 1,
     "exit_code": 0,
-    "part_marks_file": None,
+    "mark_storage": None,
     "limit": 1000,
 }

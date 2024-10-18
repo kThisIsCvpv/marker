@@ -32,7 +32,7 @@ def run_test(test):
     result["time"] = end_time - start_time
     result["passed"] = (exit_code == test['exit_code'])
     result["timed_out"] = (exit_code is None)
-    result["mark"] = compute_mark(result["passed"], test["part_marks_file"], test["mark"])
+    result["mark"] = compute_mark(result["passed"], test["mark_storage"], test["mark"])
     result["out_of"] = test["mark"]
 
     return result
